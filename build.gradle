@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+}
+
+group 'crawling'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'org.jsoup', name: 'jsoup', version: '1.10.2'
+}
+
