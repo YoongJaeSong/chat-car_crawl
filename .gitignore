@@ -21,4 +21,8 @@ gradle/wrapper/gradle-wrapper.properties
 ### Gradle Patch ###
 **/build/
 
+### Intellij ###
+# idea
+.idea/
+
 # End of https://www.gitignore.io/api/gradle
