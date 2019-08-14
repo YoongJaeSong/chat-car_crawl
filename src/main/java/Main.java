@@ -1,6 +1,7 @@
 import crawling.Crawl;
 import crawling.ExcelDTO;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -15,17 +16,18 @@ import java.security.cert.X509Certificate;
 public class Main {
     public static void main(String[] args) throws Exception {
         Main.setSSL();
-        String url = "https://www.bobaedream.co.kr/dealguide/carinfo.php?cat=spec&maker_no=49&model_no=1661&level_no=12256&class_no=26460&year_no=2016";
-        Element element;
+        String url = "https://www.bobaedream.co.kr/dealguide/carinfo.php?maker_no=49&model_no=1779&level_no=12888&class_no=27921&year_no=2018";
 
         Crawl carPage = new Crawl(url);
 
         try {
             carPage.connect();
-            element = carPage.extractCSS("tbody").get(1);
-            ExcelDTO carDTO = new ExcelDTO(element.select("tr"));
+            Elements titleElements = carPage.extractCSS("div.select-finder");
+            Element mainElements = carPage.extractCSS("tbody").get(1);
+            ExcelDTO carDTO = new ExcelDTO();
+            carDTO.extractTitleData(titleElements);
+            carDTO.extractMainData(mainElements.select("tr"));
             System.out.println(carDTO.toString());
-
         } catch (IOException e) {
             e.printStackTrace();
         }
