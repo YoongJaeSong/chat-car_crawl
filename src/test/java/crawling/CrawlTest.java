@@ -16,8 +16,8 @@ public class CrawlTest {
         Crawl crawl = new Crawl(url);
         try {
             crawl.connect();
-            Elements elements = crawl.extractCSS("span.naver_logo");
-            assertThat(elements.text(), is("네이버"));
+            Elements elements = crawl.extractCSS("a.al_favorite");
+            assertThat(elements.text(), is("네이버를 시작페이지로"));
         } catch (IOException e) {
             e.printStackTrace();
         }
