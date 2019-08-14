@@ -10,14 +10,14 @@ import java.util.Set;
 public class ExcelDTO {
     private Map<String, String> carData = new HashMap<>();
 
-    public void extractTitleData(Elements elements){
+    public void extractTitleData(Elements elements) {
         String key = null;
-        for(Element element : elements.select("option")){
-            if(element.val().equals("")){
+        for (Element element : elements.select("option")) {
+            if (element.val().equals("")) {
                 key = element.text();
             }
 
-            if(element.hasAttr("selected")){
+            if (element.hasAttr("selected")) {
                 carData.put(key, element.text());
             }
         }
