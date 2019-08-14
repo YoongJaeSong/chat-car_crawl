@@ -1,10 +1,11 @@
 import crawling.Crawl;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
+import crawling.ExcelDTO;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
-import javax.net.ssl.*;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -15,20 +16,19 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Main.setSSL();
         String url = "https://www.bobaedream.co.kr/dealguide/carinfo.php?cat=spec&maker_no=49&model_no=1661&level_no=12256&class_no=26460&year_no=2016";
+        Element element;
+
         Crawl carPage = new Crawl(url);
 
         try {
             carPage.connect();
+            element = carPage.extractCSS("tbody").get(1);
+            ExcelDTO carDTO = new ExcelDTO(element.select("tr"));
+            System.out.println(carDTO.toString());
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-//        Elements mainData = carPage.select(".wrap-car-spec dd");
-//        for(Element data : mainData){
-//            Elements name = data.select("span.tit");
-//            Elements value = data.select("strong.txt");
-//            System.out.println("제목: " + name.text() + ", 내용: " + value.text().replaceAll("[^0-9]", ""));
-//        }
     }
 
     private static void setSSL() throws NoSuchAlgorithmException, KeyManagementException {
