@@ -18,7 +18,6 @@ public class Crawl {
         document = Jsoup.connect(url).get();
     }
 
-
     public Elements extractCSS(String css) {
         return document.select(css);
     }
