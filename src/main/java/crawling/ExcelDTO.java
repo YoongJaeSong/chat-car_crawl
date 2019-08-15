@@ -34,6 +34,10 @@ public class ExcelDTO {
         }
     }
 
+    public Map<String, String> getCarData() {
+        return carData;
+    }
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();

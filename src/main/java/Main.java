@@ -1,5 +1,6 @@
 import crawling.Crawl;
 import crawling.ExcelDTO;
+import excel.WriteExcel;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
@@ -28,6 +29,9 @@ public class Main {
             carDTO.extractTitleData(titleElements);
             carDTO.extractMainData(mainElements.select("tr"));
             System.out.println(carDTO.toString());
+
+            WriteExcel work = new WriteExcel();
+            work.saveExcel(carDTO.getCarData());
         } catch (IOException e) {
             e.printStackTrace();
         }
