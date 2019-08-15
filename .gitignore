@@ -25,4 +25,7 @@ gradle/wrapper/gradle-wrapper.properties
 # idea
 .idea/
 
+### Excel file ###
+*.xls
+
 # End of https://www.gitignore.io/api/gradle
