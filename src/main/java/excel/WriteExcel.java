@@ -7,20 +7,33 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class WriteExcel {
-    public void saveExcel(Map<String, String> carMap) {
+    public void saveExcel(List<Map<String, String>> carList) {
         HSSFWorkbook workbook = new HSSFWorkbook();
         HSSFSheet sheet = workbook.createSheet("car data");
-        HSSFRow row = sheet.createRow(1);
+        HSSFRow titleRow = sheet.createRow(0);
         HSSFCell cell;
-        Set<String> keys = carMap.keySet();
+        Set<String> keys = carList.get(0).keySet();
+
         int idx = 0;
         for (String key : keys) {
-            row.createCell(idx).setCellValue(key);
+            titleRow.createCell(idx).setCellValue(key);
             idx++;
+        }
+
+        int rowLine = 1;
+        for (Map<String, String> carData : carList) {
+            HSSFRow valueRow = sheet.createRow(rowLine);
+            idx = 0;
+            for (String key : keys) {
+                valueRow.createCell(idx).setCellValue(carData.get(key));
+                idx++;
+            }
+            rowLine++;
         }
 
         try {
