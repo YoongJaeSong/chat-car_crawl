@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class WriteExcel {
-    public void saveExcel(List<Map<String, String>> carList) {
+    public void saveExcel(List<Map<String, String>> carList, String fileName) {
         HSSFWorkbook workbook = new HSSFWorkbook();
         HSSFSheet sheet = workbook.createSheet("car data");
         HSSFRow titleRow = sheet.createRow(0);
@@ -37,7 +37,7 @@ public class WriteExcel {
         }
 
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream("test.xls");
+            FileOutputStream fileOutputStream = new FileOutputStream(fileName);
             workbook.write(fileOutputStream);
             fileOutputStream.close();
             System.out.println("엑셀 저장 성공");
