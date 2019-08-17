@@ -7,6 +7,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.xml.bind.Element;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -20,16 +21,25 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Main.setSSL();
 
-        String baseUrl = "https://www.bobaedream.co.kr";
-        String url = "https://www.bobaedream.co.kr/mycar/mycar_list.php?gubun=K&maker_no=49&buyYearChk=2016&page=1&order=S11&view_size=20";
+        String url = "https://www.bobaedream.co.kr/mycar/mycar_list.php?gubun=K&maker_no=49&buyYearChk=2019&page=1";
         List<Map<String, String>> dataList = new ArrayList<>();
 
         try {
             Crawl urlCrawling = new Crawl(url);
-            Elements data = urlCrawling.extractCSS("a.img");
-            UrlVO urlVO = new UrlVO();
+            String lastPage = urlCrawling.extractCSS("a.last").attr("href").replaceAll("[^0-9]", "");
+
+            Elements data;
+            UrlVO urlVO;
+            Crawl crawl;
+            for (int page = 1; page <= Integer.parseInt(lastPage); page++) {
+                crawl = new Crawl("https://www.bobaedream.co.kr/mycar/mycar_list.php?gubun=K&maker_no=49&buyYearChk=2019&page=" + page);
+                data = crawl.extractCSS("a.img");
+                urlVO = new UrlVO();
+                dataList.addAll(urlVO.findNextUrls(data));
+            }
+
             WriteExcel work = new WriteExcel();
-            work.saveExcel(urlVO.findNextUrls(data), "next_url.xls");
+            work.saveExcel(dataList, "hyundai_2019.xls");
         } catch (IOException e) {
             e.printStackTrace();
         }
