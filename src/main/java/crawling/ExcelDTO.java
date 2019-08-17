@@ -8,15 +8,22 @@ import java.util.Map;
 import java.util.Set;
 
 public class ExcelDTO {
-    private Elements elements;
     private Map<String, String> carData = new HashMap<>();
 
-    public ExcelDTO(Elements elements) {
-        this.elements = elements;
-        extractData();
+    public void extractTitleData(Elements elements) {
+        String key = null;
+        for (Element element : elements.select("option")) {
+            if (element.val().equals("")) {
+                key = element.text();
+            }
+
+            if (element.hasAttr("selected")) {
+                carData.put(key, element.text());
+            }
+        }
     }
 
-    private void extractData() {
+    public void extractMainData(Elements elements) {
         for (Element element : elements) {
             Elements children = element.children();
             if (children.size() == 2) {
@@ -25,6 +32,10 @@ public class ExcelDTO {
                 carData.put(children.get(1).text(), children.get(2).text());
             }
         }
+    }
+
+    public Map<String, String> getCarData() {
+        return carData;
     }
 
     @Override

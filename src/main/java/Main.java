@@ -1,6 +1,8 @@
 import crawling.Crawl;
 import crawling.ExcelDTO;
+import excel.WriteExcel;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -11,21 +13,34 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         Main.setSSL();
-        String url = "https://www.bobaedream.co.kr/dealguide/carinfo.php?cat=spec&maker_no=49&model_no=1661&level_no=12256&class_no=26460&year_no=2016";
-        Element element;
-
-        Crawl carPage = new Crawl(url);
+//        String url = "https://www.bobaedream.co.kr/dealguide/carinfo.php?maker_no=49&model_no=1779&level_no=12888&class_no=27921&year_no=2018";
+//        List<String> urlList = new ArrayList<>();
+        String[] urlList = {"https://www.bobaedream.co.kr/dealguide/carinfo.php?cat=spec&maker_no=49&model_no=1646&level_no=12181&class_no=26263&year_no=2016",
+                "https://www.bobaedream.co.kr/dealguide/carinfo.php?maker_no=49&model_no=1779&level_no=12888&class_no=27921&year_no=2018"};
+        List<Map<String, String>> dataList = new ArrayList<>();
 
         try {
-            carPage.connect();
-            element = carPage.extractCSS("tbody").get(1);
-            ExcelDTO carDTO = new ExcelDTO(element.select("tr"));
-            System.out.println(carDTO.toString());
+            for (String url : urlList) {
+                Crawl carPage = new Crawl(url);
+                carPage.connect();
+                Elements titleElements = carPage.extractCSS("div.select-finder");
+                Element mainElements = carPage.extractCSS("tbody").get(1);
+                ExcelDTO carDTO = new ExcelDTO();
+                carDTO.extractTitleData(titleElements);
+                carDTO.extractMainData(mainElements.select("tr"));
 
+                dataList.add(carDTO.getCarData());
+            }
+
+            WriteExcel work = new WriteExcel();
+            work.saveExcel(dataList);
         } catch (IOException e) {
             e.printStackTrace();
         }
