@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class ExcelDTO {
+public class ExcelVO {
     private Map<String, String> carData = new HashMap<>();
 
     public void extractTitleData(Elements elements) {
