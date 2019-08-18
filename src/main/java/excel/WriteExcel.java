@@ -5,6 +5,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -22,7 +23,7 @@ public class WriteExcel {
         keys = carList.get(0).keySet();
     }
 
-    public void saveNewExcel() {
+    public void saveNewExcel() throws IOException {
         HSSFWorkbook workbook = new HSSFWorkbook();
         HSSFSheet sheet = workbook.createSheet("car data");
         HSSFRow titleRow = sheet.createRow(0);
@@ -33,16 +34,8 @@ public class WriteExcel {
             idx++;
         }
 
-        saveExcel(sheet, 1);
-
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(fileName);
-            workbook.write(fileOutputStream);
-            fileOutputStream.close();
-            System.out.println("엑셀 저장 성공");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        writeRows(sheet, 1);
+        saveExcel(workbook);
     }
 
     public void saveExistExcel() throws IOException {
@@ -50,19 +43,11 @@ public class WriteExcel {
         HSSFSheet sheet = workbook.getSheetAt(0);
         int lastRow = sheet.getPhysicalNumberOfRows();
 
-        saveExcel(sheet, lastRow);
-
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(fileName);
-            workbook.write(fileOutputStream);
-            fileOutputStream.close();
-            System.out.println("엑셀 저장 성공");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        writeRows(sheet, lastRow);
+        saveExcel(workbook);
     }
 
-    private HSSFRow saveExcel(HSSFSheet sheet, int rowIdx) {
+    private void writeRows(HSSFSheet sheet, int rowIdx) {
         HSSFRow row = null;
         int cellIdx;
 
@@ -75,7 +60,12 @@ public class WriteExcel {
             }
             rowIdx++;
         }
+    }
 
-        return row;
+    private void saveExcel(HSSFWorkbook workbook) throws IOException {
+        FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+        workbook.write(fileOutputStream);
+        fileOutputStream.close();
+        System.out.println("엑셀 저장 성공");
     }
 }
