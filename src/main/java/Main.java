@@ -11,6 +11,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -44,13 +45,12 @@ public class Main {
                     dataList.addAll(urlVO.findNextUrls(data));
                 }
 
-                WriteExcel work = new WriteExcel();
-                work.saveExcel(dataList, fileName);
+                WriteExcel work = new WriteExcel(dataList, fileName);
+                work.saveNewExcel();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else if (args.length == 1) {
-            System.out.println("=================================");
             String readFileName = args[0];
             FileInputStream fis = new FileInputStream(readFileName);
             HSSFWorkbook workbook = new HSSFWorkbook(fis);
@@ -69,8 +69,13 @@ public class Main {
                     dataList.add(carDTO.getCarData());
                 }
 
-                WriteExcel work = new WriteExcel();
-                work.saveExcel(dataList, "car_data.xls");
+                WriteExcel work = new WriteExcel(dataList, "test.xls");
+                File file = new File("test.xls");
+                if(file.exists()){
+                    work.saveExistExcel();
+                }else {
+                    work.saveNewExcel();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
