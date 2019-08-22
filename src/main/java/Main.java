@@ -39,6 +39,7 @@ public class Main {
                 UrlVO urlVO;
                 Crawl crawl;
                 for (int page = 1; page <= Integer.parseInt(lastPage); page++) {
+                    System.out.println(page);
                     crawl = new Crawl(url.substring(0, url.length() - 1) + page);
                     data = crawl.extractCSS("a.img");
                     urlVO = new UrlVO();
@@ -46,7 +47,12 @@ public class Main {
                 }
 
                 WriteExcel work = new WriteExcel(dataList, fileName);
-                work.saveNewExcel();
+                File file = new File(fileName);
+                if(file.exists()){
+                    work.saveExistExcel();
+                }else{
+                    work.saveNewExcel();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -58,6 +64,7 @@ public class Main {
 
             try {
                 for (int rowidx=1; rowidx < sheet.getPhysicalNumberOfRows(); rowidx++) {
+                    System.out.println(rowidx);
                     String url = sheet.getRow(rowidx).getCell(0).getStringCellValue();
                     Crawl carPage = new Crawl(url);
                     Elements titleElements = carPage.extractCSS("div.select-finder");
@@ -68,16 +75,16 @@ public class Main {
 
                     dataList.add(carDTO.getCarData());
                 }
-
-                WriteExcel work = new WriteExcel(dataList, "test.xls");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }finally {
+                WriteExcel work = new WriteExcel(dataList, "car_data.xls");
                 File file = new File("test.xls");
                 if(file.exists()){
                     work.saveExistExcel();
                 }else {
                     work.saveNewExcel();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
     }
