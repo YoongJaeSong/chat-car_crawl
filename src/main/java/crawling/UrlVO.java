@@ -1,34 +1,63 @@
 package crawling;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class UrlVO {
-    private List<Map<String , String>> urlMapList;
+    private String url;
 
     private static final String BASE_URL = "https://www.bobaedream.co.kr";
-    private static final String HREF = "href";
 
-    public UrlVO() {
-        this.urlMapList = new ArrayList<>();
+    public UrlVO(String url) {
+        this.url = url;
     }
 
-    public List<Map<String, String>> findNextUrls(Elements elements) throws IOException {
-        for(Element data : elements){
-            String nextUrl = BASE_URL + data.attr(HREF);
-            Crawl nextPage = new Crawl(nextUrl);
-            Map<String, String> obj = new HashMap<>();
+    private Map<String, String> findLoop(Elements items){
+        Map<String, String> map = new HashMap<>();
+        String key;
+        String value;
 
-            obj.put("URL", BASE_URL + nextPage.extractCSS("a.btn-more-round").attr(HREF));
-            urlMapList.add(obj);
+        for(Element item : items){
+            if(item.val().equals("")){
+                continue;
+            }
+
+            key = StringEscapeUtils.unescapeJava(item.val());
+            value = StringEscapeUtils.unescapeJava(item.text().split("<")[0]);
+            System.out.println(key + " / " + value);
+            map.put(key, value);
         }
 
-        return urlMapList;
+        return map;
+    }
+
+    public void findModelNo(int makerNo) throws IOException {
+        Document doc = postRequest("model", Integer.toString(makerNo));
+        Map<String, String> modelMap = findLoop(doc.select("option"));
+        findLevelNo(modelMap);
+    }
+
+    public void findLevelNo(Map<String, String> modelMap) throws IOException {
+        Document doc;
+        Map<String, String> levelMap = new HashMap<>();
+        for(String key : modelMap.keySet()){
+            doc = postRequest("level", key);
+            levelMap.putAll(findLoop(doc.select("option")));
+        }
+    }
+
+    private Document postRequest(String depth, String no) throws IOException {
+        return Jsoup.connect(url)
+                .header("Origin", BASE_URL)
+                .data("depth", depth)
+                .data("no", no)
+                .post();
     }
 }
