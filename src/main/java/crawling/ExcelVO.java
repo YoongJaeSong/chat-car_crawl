@@ -10,6 +10,18 @@ import java.util.Set;
 public class ExcelVO {
     private Map<String, String> carData = new HashMap<>();
 
+    public void extractUrlData(String url){
+        String[] partOfUrl = url.split("&");
+        String key;
+        String value;
+
+        for(int i=1; i < partOfUrl.length; i++){
+            key = partOfUrl[i].split("=")[0];
+            value = partOfUrl[i].split("=")[1];
+            carData.put(key, value);
+        }
+    }
+
     public void extractTitleData(Elements elements) {
         String key = null;
         for (Element element : elements.select("option")) {

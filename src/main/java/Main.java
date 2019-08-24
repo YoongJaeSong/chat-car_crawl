@@ -19,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,13 +33,21 @@ public class Main {
             String fileName = args[1];
 
             UrlVO urlVo = new UrlVO(makerNo);
-            urlVo.addUrl();
-            List<String> urlList = urlVo.getUrlList();
 
-            for (String u : urlList) {
-                System.out.println(u);
+            try {
+                urlVo.addUrl();
+                List<Map<String, String>> urlList = urlVo.getUrlList();
+
+                WriteExcel work = new WriteExcel(urlList, fileName);
+                File file = new File(fileName);
+                if (file.exists()) {
+                    work.saveExistExcel();
+                } else {
+                    work.saveNewExcel();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
         } else if (args.length == 1) {
             String readFileName = args[0];
             FileInputStream fis = new FileInputStream(readFileName);
@@ -53,6 +62,7 @@ public class Main {
                     Elements titleElements = carPage.extractCSS("div.select-finder");
                     Element mainElements = carPage.extractCSS("tbody").get(1);
                     ExcelVO carDTO = new ExcelVO();
+                    carDTO.extractUrlData(url);
                     carDTO.extractTitleData(titleElements);
                     carDTO.extractMainData(mainElements.select("tr"));
 
@@ -61,8 +71,8 @@ public class Main {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                WriteExcel work = new WriteExcel(dataList, "car_data.xls");
-                File file = new File("test.xls");
+                WriteExcel work = new WriteExcel(dataList, "new_car_data.xls");
+                File file = new File("new_car_data.xls");
                 if (file.exists()) {
                     work.saveExistExcel();
                 } else {
