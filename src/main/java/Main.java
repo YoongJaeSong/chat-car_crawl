@@ -28,34 +28,17 @@ public class Main {
         List<Map<String, String>> dataList = new ArrayList<>();
 
         if (args.length == 2) {
-            String url = args[0];
+            String makerNo = args[0];
             String fileName = args[1];
 
-            try {
-                Crawl urlCrawling = new Crawl(url);
-                String lastPage = urlCrawling.extractCSS("a.last").attr("href").replaceAll("[^0-9]", "");
+            UrlVO urlVo = new UrlVO(makerNo);
+            urlVo.addUrl();
+            List<String> urlList = urlVo.getUrlList();
 
-                Elements data;
-                UrlVO urlVO;
-                Crawl crawl;
-                for (int page = 1; page <= Integer.parseInt(lastPage); page++) {
-                    System.out.println(page);
-                    crawl = new Crawl(url.substring(0, url.length() - 1) + page);
-                    data = crawl.extractCSS("a.img");
-                    urlVO = new UrlVO();
-                    dataList.addAll(urlVO.findNextUrls(data));
-                }
-
-                WriteExcel work = new WriteExcel(dataList, fileName);
-                File file = new File(fileName);
-                if(file.exists()){
-                    work.saveExistExcel();
-                }else{
-                    work.saveNewExcel();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            for (String u : urlList) {
+                System.out.println(u);
             }
+
         } else if (args.length == 1) {
             String readFileName = args[0];
             FileInputStream fis = new FileInputStream(readFileName);
@@ -63,7 +46,7 @@ public class Main {
             HSSFSheet sheet = workbook.getSheetAt(0);
 
             try {
-                for (int rowidx=1; rowidx < sheet.getPhysicalNumberOfRows(); rowidx++) {
+                for (int rowidx = 1; rowidx < sheet.getPhysicalNumberOfRows(); rowidx++) {
                     System.out.println(rowidx);
                     String url = sheet.getRow(rowidx).getCell(0).getStringCellValue();
                     Crawl carPage = new Crawl(url);
@@ -77,12 +60,12 @@ public class Main {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 WriteExcel work = new WriteExcel(dataList, "car_data.xls");
                 File file = new File("test.xls");
-                if(file.exists()){
+                if (file.exists()) {
                     work.saveExistExcel();
-                }else {
+                } else {
                     work.saveNewExcel();
                 }
             }

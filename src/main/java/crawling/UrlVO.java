@@ -1,60 +1,101 @@
 package crawling;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UrlVO {
-    private String url;
+    private List<String> urlList;
+    private String markerNo;
 
+    private static final String URL = "https://www.bobaedream.co.kr/dealguide/ajax_depth.php";
     private static final String BASE_URL = "https://www.bobaedream.co.kr";
+    private static final String START_URL = "https://www.bobaedream.co.kr/dealguide/carinfo.php?";
 
-    public UrlVO(String url) {
-        this.url = url;
+    public UrlVO(String markerNo) {
+        this.urlList = new ArrayList<>();
+        this.markerNo = markerNo;
     }
 
-    private Map<String, String> findLoop(Elements items){
-        Map<String, String> map = new HashMap<>();
-        String key;
-        String value;
+    public void addUrl() throws IOException {
+        String firstUrl = START_URL + "maker_no=" + markerNo;
+        findModelNo(markerNo, firstUrl);
+    }
 
-        for(Element item : items){
-            if(item.val().equals("")){
+    private void findModelNo(String makerNo, String firstUrl) throws IOException {
+        Document doc = postRequest("model", makerNo);
+        String modelNo;
+        String second_url;
+
+        for(Element item : doc.select("option")){
+            modelNo = item.val();
+            if(modelNo.equals("")){
                 continue;
             }
 
-            key = StringEscapeUtils.unescapeJava(item.val());
-            value = StringEscapeUtils.unescapeJava(item.text().split("<")[0]);
-            System.out.println(key + " / " + value);
-            map.put(key, value);
+            second_url = firstUrl + "&model_no=" + modelNo;
+            findLevelNo(modelNo, second_url);
         }
-
-        return map;
     }
 
-    public void findModelNo(int makerNo) throws IOException {
-        Document doc = postRequest("model", Integer.toString(makerNo));
-        Map<String, String> modelMap = findLoop(doc.select("option"));
-        findLevelNo(modelMap);
+    private void findLevelNo(String modelNo, String secondUrl) throws IOException {
+        Document doc = postRequest("level", modelNo);
+        String thirdUrl;
+        String levelNo;
+
+        for(Element item : doc.select("option")){
+            levelNo = item.val();
+            if(levelNo.equals("")){
+                continue;
+            }
+
+            thirdUrl = secondUrl + "&level_no=" + levelNo;
+            findClassNo(levelNo, thirdUrl);
+        }
     }
 
-    public void findLevelNo(Map<String, String> modelMap) throws IOException {
-        Document doc;
-        Map<String, String> levelMap = new HashMap<>();
-        for(String key : modelMap.keySet()){
-            doc = postRequest("level", key);
-            levelMap.putAll(findLoop(doc.select("option")));
+    private void findClassNo(String levelNo, String thirdUrl) throws IOException {
+        Document doc = postRequest("class", levelNo);
+        String classNo;
+        String fourthUrl;
+
+        for(Element item : doc.select("option")){
+            classNo = item.val();
+            if(classNo.equals("")){
+                continue;
+            }
+
+            fourthUrl = thirdUrl + "&class_no=" + classNo;
+            findYear(classNo, fourthUrl);
         }
+    }
+
+    private void findYear(String classNo, String fourthUrl) throws IOException {
+        Document doc = postRequest("year", classNo);
+        String year;
+        String lastUrl;
+
+        for(Element item : doc.select("option")){
+            year = item.val();
+            if(year.equals("")){
+                continue;
+            }
+
+            lastUrl = fourthUrl + "&year_no=" +year;
+            urlList.add(lastUrl);
+        }
+    }
+
+    public List<String> getUrlList() {
+        return urlList;
     }
 
     private Document postRequest(String depth, String no) throws IOException {
-        return Jsoup.connect(url)
+        return Jsoup.connect(URL)
                 .header("Origin", BASE_URL)
                 .data("depth", depth)
                 .data("no", no)
