@@ -18,10 +18,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -53,31 +50,42 @@ public class Main {
             FileInputStream fis = new FileInputStream(readFileName);
             HSSFWorkbook workbook = new HSSFWorkbook(fis);
             HSSFSheet sheet = workbook.getSheetAt(0);
+            Queue<String> urlQueue = new ArrayDeque<>();
 
-            try {
-                for (int rowidx = 1; rowidx < sheet.getPhysicalNumberOfRows(); rowidx++) {
-                    System.out.println(rowidx);
-                    String url = sheet.getRow(rowidx).getCell(0).getStringCellValue();
-                    Crawl carPage = new Crawl(url);
-                    Elements titleElements = carPage.extractCSS("div.select-finder");
-                    Element mainElements = carPage.extractCSS("tbody").get(1);
-                    ExcelVO carDTO = new ExcelVO();
-                    carDTO.extractUrlData(url);
-                    carDTO.extractTitleData(titleElements);
-                    carDTO.extractMainData(mainElements.select("tr"));
+            for(int rowidx = 1; rowidx < sheet.getPhysicalNumberOfRows(); rowidx++){
+                urlQueue.offer(sheet.getRow(rowidx).getCell(0).getStringCellValue());
+            }
 
-                    dataList.add(carDTO.getCarData());
+            Crawl curPage;
+            Elements titleItems;
+            Element mainItem;
+            ExcelVO carData;
+            String curUrl;
+            while(!urlQueue.isEmpty()){
+                curUrl = urlQueue.poll();
+                try {
+                    curPage = new Crawl(curUrl);
+                } catch (IOException e) {
+                    System.out.println(curUrl);
+                    urlQueue.offer(curUrl);
+                    continue;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                WriteExcel work = new WriteExcel(dataList, "new_car_data.xls");
-                File file = new File("new_car_data.xls");
-                if (file.exists()) {
-                    work.saveExistExcel();
-                } else {
-                    work.saveNewExcel();
-                }
+                titleItems = curPage.extractCSS("div.select-finder");
+                mainItem = curPage.extractCSS("tbody").get(1);
+                carData = new ExcelVO();
+
+                carData.extractUrlData(curUrl);
+                carData.extractTitleData(titleItems);
+                carData.extractMainData(mainItem.select("tr"));
+                dataList.add(carData.getCarData());
+            }
+
+            WriteExcel work = new WriteExcel(dataList, "new_car_data.xls");
+            File file = new File("new_car_data.xls");
+            if (file.exists()) {
+                work.saveExistExcel();
+            } else {
+                work.saveNewExcel();
             }
         }
     }
