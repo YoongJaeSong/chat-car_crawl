@@ -6,10 +6,12 @@ import org.jsoup.nodes.Element;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UrlVO {
-    private List<String> urlList;
+    private List<Map<String, String>> urlList;
     private String markerNo;
 
     private static final String URL = "https://www.bobaedream.co.kr/dealguide/ajax_depth.php";
@@ -76,21 +78,22 @@ public class UrlVO {
 
     private void findYear(String classNo, String fourthUrl) throws IOException {
         Document doc = postRequest("year", classNo);
+        HashMap<String, String> urlMap = new HashMap<>();
         String year;
         String lastUrl;
 
         for(Element item : doc.select("option")){
             year = item.val();
-            if(year.equals("")){
+            if(year.equals("") || (year.compareTo("2015") < 0)){
                 continue;
             }
 
             lastUrl = fourthUrl + "&year_no=" +year;
-            urlList.add(lastUrl);
+            urlList.add(Map.of("url", lastUrl));
         }
     }
 
-    public List<String> getUrlList() {
+    public List<Map<String, String>> getUrlList() {
         return urlList;
     }
 
