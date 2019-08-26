@@ -37,6 +37,11 @@ public class ExcelVO {
 
     public void extractMainData(Elements elements) {
         for (Element element : elements) {
+            if(element.hasClass("color")){
+                saveColors(element.select("li"));
+                continue;
+            }
+
             Elements children = element.children();
             if (children.size() == 2) {
                 carData.put(children.get(0).text(), children.get(1).text());
@@ -44,6 +49,21 @@ public class ExcelVO {
                 carData.put(children.get(1).text(), children.get(2).text());
             }
         }
+    }
+
+    private void saveColors(Elements colors){
+        Map<String, String> colorMap = new HashMap<>();
+        String key;
+        String value;
+
+        for(Element color : colors){
+            key = color.select("span.name").text();
+            value = color.select("span.color").first().attr("style").split(":")[1];
+            colorMap.put(key, value);
+        }
+
+        carData.put("색상", String.join(",", colorMap.keySet()));
+        carData.put("색상 표", String.join(",", colorMap.values()));
     }
 
     public Map<String, String> getCarData() {
