@@ -11,13 +11,13 @@ public class ExcelVO {
     private Map<String, String> carData = new HashMap<>();
 
     public void extractUrlData(String url){
-        String[] partOfUrl = url.split("&");
+        String[] partOfUrl = url.split("\\?")[1].split("&");
         String key;
         String value;
 
-        for(int i=1; i < partOfUrl.length; i++){
-            key = partOfUrl[i].split("=")[0];
-            value = partOfUrl[i].split("=")[1];
+        for (String subUrl : partOfUrl) {
+            key = subUrl.split("=")[0];
+            value = subUrl.split("=")[1];
             carData.put(key, value);
         }
     }
