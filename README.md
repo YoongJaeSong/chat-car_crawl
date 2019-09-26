@@ -1,3 +1,22 @@
+# 실행방법
+1. java makerNo fileName
+
+원하는 제조사의 차량들의 url조합을 저장하기위한 실행
+
+|제조사|No|
+|:---:|:---:|
+|현대|49|
+|기아|3|
+|제네시스|1010|
+|르노삼성|26|
+ex) java 49 hyundai.xls
+
+2. java fileName
+
+위에서 url를 저장한 파일명을 입력하면 저장된 url를 통해 crawling을 한다.
+
+ex) java hyundai.xls
+
 # 목적
 - chat-car project에서 사용할 데이터 수집
 
