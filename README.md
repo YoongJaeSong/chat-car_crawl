@@ -17,7 +17,7 @@ crawl로 데이터를 가져와 Excel에 저장하기
   - ExcelDTO
 - 전처리된 데이터를 Excel에 저장한다.
   - WriteExcel
-- Crawling할 사이트를 저장 or 가져온다.
+- Crawling할 사이트를 조합하기
   - UrlVO
 
 ### 행동
@@ -29,5 +29,9 @@ crawl로 데이터를 가져와 Excel에 저장하기
   - ExcelDTO
 - data 객체를 Excel에 저장한다.
   - WriteExcel
-- craling할 url를 찾는다.
+- crawling할 자동차의 model_no를 찾는다.
+  - UrlVO
+- crawling할 자동차의 class_no를 찾는다.
+  - UrlVO
+- crawling할 자동차의 year를 찾는다.
   - UrlVO
