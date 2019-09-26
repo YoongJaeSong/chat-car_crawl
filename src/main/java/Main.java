@@ -18,9 +18,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -28,29 +26,20 @@ public class Main {
         List<Map<String, String>> dataList = new ArrayList<>();
 
         if (args.length == 2) {
-            String url = args[0];
+            String makerNo = args[0];
             String fileName = args[1];
 
+            UrlVO urlVo = new UrlVO(makerNo);
+
             try {
-                Crawl urlCrawling = new Crawl(url);
-                String lastPage = urlCrawling.extractCSS("a.last").attr("href").replaceAll("[^0-9]", "");
+                urlVo.addUrl();
+                List<Map<String, String>> urlList = urlVo.getUrlList();
 
-                Elements data;
-                UrlVO urlVO;
-                Crawl crawl;
-                for (int page = 1; page <= Integer.parseInt(lastPage); page++) {
-                    System.out.println(page);
-                    crawl = new Crawl(url.substring(0, url.length() - 1) + page);
-                    data = crawl.extractCSS("a.img");
-                    urlVO = new UrlVO();
-                    dataList.addAll(urlVO.findNextUrls(data));
-                }
-
-                WriteExcel work = new WriteExcel(dataList, fileName);
+                WriteExcel work = new WriteExcel(urlList, fileName);
                 File file = new File(fileName);
-                if(file.exists()){
+                if (file.exists()) {
                     work.saveExistExcel();
-                }else{
+                } else {
                     work.saveNewExcel();
                 }
             } catch (IOException e) {
@@ -61,30 +50,42 @@ public class Main {
             FileInputStream fis = new FileInputStream(readFileName);
             HSSFWorkbook workbook = new HSSFWorkbook(fis);
             HSSFSheet sheet = workbook.getSheetAt(0);
+            Queue<String> urlQueue = new ArrayDeque<>();
 
-            try {
-                for (int rowidx=1; rowidx < sheet.getPhysicalNumberOfRows(); rowidx++) {
-                    System.out.println(rowidx);
-                    String url = sheet.getRow(rowidx).getCell(0).getStringCellValue();
-                    Crawl carPage = new Crawl(url);
-                    Elements titleElements = carPage.extractCSS("div.select-finder");
-                    Element mainElements = carPage.extractCSS("tbody").get(1);
-                    ExcelVO carDTO = new ExcelVO();
-                    carDTO.extractTitleData(titleElements);
-                    carDTO.extractMainData(mainElements.select("tr"));
+            for(int rowidx = 1; rowidx < sheet.getPhysicalNumberOfRows(); rowidx++){
+                urlQueue.offer(sheet.getRow(rowidx).getCell(0).getStringCellValue());
+            }
 
-                    dataList.add(carDTO.getCarData());
+            Crawl curPage;
+            Elements titleItems;
+            Element mainItem;
+            ExcelVO carData;
+            String curUrl;
+            while(!urlQueue.isEmpty()){
+                curUrl = urlQueue.poll();
+                try {
+                    curPage = new Crawl(curUrl);
+                } catch (IOException e) {
+                    System.out.println(curUrl);
+                    urlQueue.offer(curUrl);
+                    continue;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }finally {
-                WriteExcel work = new WriteExcel(dataList, "car_data.xls");
-                File file = new File("test.xls");
-                if(file.exists()){
-                    work.saveExistExcel();
-                }else {
-                    work.saveNewExcel();
-                }
+                titleItems = curPage.extractCSS("div.select-finder");
+                mainItem = curPage.extractCSS("tbody").get(1);
+                carData = new ExcelVO();
+
+                carData.extractUrlData(curUrl);
+                carData.extractTitleData(titleItems);
+                carData.extractMainData(mainItem.select("tr"));
+                dataList.add(carData.getCarData());
+            }
+
+            WriteExcel work = new WriteExcel(dataList, "new_car_data.xls");
+            File file = new File("new_car_data.xls");
+            if (file.exists()) {
+                work.saveExistExcel();
+            } else {
+                work.saveNewExcel();
             }
         }
     }
